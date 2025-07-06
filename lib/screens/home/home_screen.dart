@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
-import 'package:flutter_application_1/screens/productos/productos_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final AuthService _authService = AuthService();

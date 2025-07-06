@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
+import 'package:flutter_application_1/screens/productos/productos_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final AuthService _authService = AuthService();
@@ -81,6 +83,17 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 0) return;
+          if (index == 1) {
+            Navigator.pushNamed(context, '/schedule');
+          } else if (index == 2) {
+            Navigator.pushNamed(context, '/productos');
+          }
+        },
       ),
     );
   }

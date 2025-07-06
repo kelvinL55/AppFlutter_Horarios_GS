@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
 
 class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({super.key});
@@ -25,7 +26,7 @@ class ScheduleScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Schedule',
+          'Horario',
           style: TextStyle(
             color: Color(0xFF111418),
             fontWeight: FontWeight.bold,
@@ -104,40 +105,6 @@ class ScheduleScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Pie de página de navegación
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Color(0xFFF0F2F5), width: 1),
-              ),
-              color: Colors.white,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavIcon(
-                  icon: Icons.home,
-                  label: 'Home',
-                  selected: false,
-                  onTap: () => Navigator.pushNamed(context, '/home'),
-                ),
-                _NavIcon(
-                  icon: Icons.calendar_month,
-                  label: 'Schedule',
-                  selected: true,
-                  onTap: () {},
-                ),
-                _NavIcon(
-                  icon: Icons.person,
-                  label: 'Profile',
-                  selected: false,
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
           // Botón para ir al calendario
           Center(
             child: ElevatedButton.icon(
@@ -157,48 +124,17 @@ class ScheduleScreen extends StatelessWidget {
           const SizedBox(height: 16),
         ],
       ),
-    );
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _NavIcon({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Color(0xFF111418) : Color(0xFF60758a),
-              size: 28,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Color(0xFF111418) : Color(0xFF60758a),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.015,
-              ),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/home');
+          } else if (index == 1) {
+            // Ya estamos en Schedule
+          } else if (index == 2) {
+            Navigator.pushNamed(context, '/productos');
+          }
+        },
       ),
     );
   }

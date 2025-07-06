@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "name": "Apple iPhone 15 Pro",
+    "category": "smartphone",
+    "image_url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy S24 Ultra",
+    "category": "smartphone",
+    "image_url": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "id": 3,
+    "name": "Google Pixel 9 Pro",
+    "category": "smartphone",
+    "image_url": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "id": 4,
+    "name": "OnePlus 13",
+    "category": "smartphone",
+    "image_url": "https://image01.oneplus.net/ebp/202501/15/1-m00-13.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Xiaomi 15 Pro",
+    "category": "smartphone",
+    "image_url": "https://i01.appmifile.com/webfile/globalimg/products/pc/mi-15-pro/specs/black.png"
+  },
+  {
+    "id": 6,
+    "name": "Sony Xperia 1 VI",
+    "category": "smartphone",
+    "image_url": "https://www.sony.com/image/xperia-1vi-black-front-back.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Huawei Pura 70 Pro",
+    "category": "smartphone",
+    "image_url": "https://consumer.huawei.com/content/dam/huawei-cbg-site/common/mkt/pdp/phones/pura70-pro/img/pura70-pro-black.png"
+  },
+  {
+    "id": 8,
+    "name": "Motorola Edge 50 Pro",
+    "category": "smartphone",
+    "image_url": "https://motorolaus.vtexassets.com/arquivos/ids/195208/edge-50-pro-front-back.png"
+  },
+  {
+    "id": 9,
+    "name": "Oppo Find X8 Pro",
+    "category": "smartphone",
+    "image_url": "https://www.oppo.com/content/dam/oppo/product-architecture/find-x8-pro/front-back-black.png"
+  },
+  {
+    "id": 10,
+    "name": "Asus ROG Phone 9",
+    "category": "smartphone",
+    "image_url": "https://dlcdnrog.asus.com/rog/media/1658399659133.jpg"
+  },
+  {
+    "id": 11,
+    "name": "Apple MacBook Pro 14 (M4)",
+    "category": "laptop",
+    "image_url": "https://www.apple.com/v/macbook-pro-14/d/images/overview/finish_m2_clear__f7a34vy5h5qe_large.jpg"
+  },
+  {
+    "id": 12,
+    "name": "Dell XPS 15 (2025)",
+    "category": "laptop",
+    "image_url": "https://i.dell.com/sites/csimages/Merchandizing_Imagery/all/xps-15-9520-laptop.png"
+  },
+  {
+    "id": 13,
+    "name": "HP Spectre x360 14 (2025)",
+    "category": "laptop",
+    "image_url": "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08594625.png"
+  },
+  {
+    "id": 14,
+    "name": "Lenovo ThinkPad X1 Carbon Gen 13",
+    "category": "laptop",
+    "image_url": "https://www.lenovo.com/medias/thinkpad-x1-carbon-gen-13-black.png"
+  },
+  {
+    "id": 15,
+    "name": "Asus ROG Zephyrus G16 (2025)",
+    "category": "laptop",
+    "image_url": "https://dlcdnrog.asus.com/rog/media/1700000000000.jpg"
+  },
+  {
+    "id": 16,
+    "name": "Microsoft Surface Laptop 7",
+    "category": "laptop",
+    "image_url": "https://c.s-microsoft.com/en-us/CMSImages/Surface-Laptop-7-Mica.png"
+  },
+  {
+    "id": 17,
+    "name": "Acer Swift 14 AI",
+    "category": "laptop",
+    "image_url": "https://static.acer.com/up/Resource/Acer/Swift14AI/Swift14AI_Silver.png"
+  },
+  {
+    "id": 18,
+    "name": "MSI Stealth 16 AI Studio",
+    "category": "laptop",
+    "image_url": "https://us-store.msi.com/images/stealth-16-ai-studio-front.png"
+  },
+  {
+    "id": 19,
+    "name": "Razer Blade 16 (2025)",
+    "category": "laptop",
+    "image_url": "https://assets2.razerzone.com/images/products/razer-blade-16/black.png"
+  },
+  {
+    "id": 20,
+    "name": "Samsung Galaxy Book4 Ultra",
+    "category": "laptop",
+    "image_url": "https://image-us.samsung.com/us/laptops/galaxy-book4-ultra/buy/Book4Ultra_front.png"
+  },
+  {
+    "id": 21,
+    "name": "DJI Mavic 4 Pro",
+    "category": "drone",
+    "image_url": "https://www.dji.com/cdn/product-image/mavic-4-pro-front.png"
+  },
+  {
+    "id": 22,
+    "name": "DJI Mini 4 Pro",
+    "category": "drone",
+    "image_url": "https://www.dji.com/cdn/product-image/mini-4-pro-front.png"
+  },
+  {
+    "id": 23,
+    "name": "DJI Air 4",
+    "category": "drone",
+    "image_url": "https://www.dji.com/cdn/product-image/air-4-front.png"
+  },
+  {
+    "id": 24,
+    "name": "Autel Robotics EVO Nano+",
+    "category": "drone",
+    "image_url": "https://auteldrones.com/cdn/images/evo-nano-plus.png"
+  },
+  {
+    "id": 25,
+    "name": "Yuneec Typhoon H3",
+    "category": "drone",
+    "image_url": "https://www.yuneec.com/media/typhoon-h3-front.png"
+  },
+  {
+    "id": 26,
+    "name": "Skydio X10",
+    "category": "drone",
+    "image_url": "https://www.skydio.com/images/x10-front.png"
+  },
+  {
+    "id": 27,
+    "name": "Parrot Anafi Ai",
+    "category": "drone",
+    "image_url": "https://www.parrot.com/sites/default/files/anafi_ai_front.png"
+  },
+  {
+    "id": 28,
+    "name": "Ryze Tello EDU",
+    "category": "drone",
+    "image_url": "https://www.ryzerobotics.com/images/tello-edu-front.png"
+  },
+  {
+    "id": 29,
+    "name": "Autel Robotics EVO Lite+",
+    "category": "drone",
+    "image_url": "https://auteldrones.com/cdn/images/evo-lite-plus.png"
+  },
+  {
+    "id": 30,
+    "name": "Skydio 2+",
+    "category": "drone",
+    "image_url": "https://www.skydio.com/images/2plus-front.png"
+  }
+]

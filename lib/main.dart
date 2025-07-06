@@ -6,6 +6,8 @@ import 'package:flutter_application_1/screens/schedule/schedule_screen.dart';
 import 'package:flutter_application_1/screens/schedule/calendar_screen.dart';
 import 'firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'splash.dart';
+import 'screens/productos/productos_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,12 +30,14 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: '/splash',
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/splash': (context) => Splash(),
         '/home': (context) => HomeScreen(),
         '/schedule': (context) => const ScheduleScreen(),
         '/calendar': (context) => const CalendarScreen(),
+        '/productos': (context) => ProductosScreen(),
       },
     );
   }

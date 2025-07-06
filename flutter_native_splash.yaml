@@ -1,0 +1,9 @@
+flutter_native_splash:
+  color: "#0a192f" # Un azul oscuro moderno
+  image: assets/images/logo.png
+  android: true
+  ios: true
+  web: true
+  android_gravity: center
+  ios_content_mode: center
+  web_image_mode: center

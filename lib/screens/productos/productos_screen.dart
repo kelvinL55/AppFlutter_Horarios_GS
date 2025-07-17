@@ -1,7 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
+import 'package:flutter_application_1/widgets/product_card.dart';
+import 'package:flutter_application_1/models/product_model.dart';
+import 'package:flutter_application_1/services/product_service.dart';
+import 'package:flutter_application_1/screens/productos/add_edit_product_screen.dart';
 
 class ProductosScreen extends StatefulWidget {
   @override
@@ -9,94 +11,119 @@ class ProductosScreen extends StatefulWidget {
 }
 
 class _ProductosScreenState extends State<ProductosScreen> {
-  List<dynamic> productos = [];
-  bool loading = true;
+  final ProductService _productService = ProductService();
   int? imagenExpandida;
-  int itemsToShow = 10;
-  final int itemsPerPage = 10;
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    cargarProductos();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !loading) {
-      setState(() {
-        itemsToShow = (itemsToShow + itemsPerPage).clamp(0, productos.length);
-      });
-    }
-  }
-
-  Future<void> cargarProductos() async {
-    final String response = await rootBundle.loadString(
-      'assets/data/tech_products.json',
-    );
-    final data = await json.decode(response);
-    setState(() {
-      productos = data;
-      loading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Productos'), centerTitle: true),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                GridView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.7,
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Productos'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+      ),
+      body: StreamBuilder<List<ProductModel>>(
+        stream: _productService.getProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error al cargar productos: ${snapshot.error}',
+                    textAlign: TextAlign.center,
                   ),
-                  itemCount: itemsToShow,
-                  itemBuilder: (context, index) {
-                    if (index >= productos.length) return const SizedBox();
-                    final producto = productos[index];
-                    return _ProductoCard(
-                      producto: producto,
-                      onImageTap: () {
-                        setState(() {
-                          imagenExpandida = index;
-                        });
-                      },
-                    );
-                  },
+                ],
+              ),
+            );
+          }
+
+          final productos = snapshot.data ?? [];
+
+          if (productos.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No hay productos disponibles',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Agrega tu primer producto',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Stack(
+            children: [
+              GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.7,
                 ),
-                if (imagenExpandida != null)
-                  GestureDetector(
-                    onTap: () => setState(() => imagenExpandida = null),
-                    child: Container(
-                      color: Colors.black.withOpacity(0.85),
-                      alignment: Alignment.center,
-                      child: InteractiveViewer(
-                        child: Image.network(
-                          productos[imagenExpandida!]['image_url'],
-                          fit: BoxFit.contain,
-                        ),
+                itemCount: productos.length,
+                itemBuilder: (context, index) {
+                  final producto = productos[index];
+                  return ProductCard(
+                    product: producto,
+                    onEdit: () => _editProduct(producto),
+                    onDelete: () => _deleteProduct(producto.id),
+                    onImageTap: () {
+                      setState(() {
+                        imagenExpandida = index;
+                      });
+                    },
+                  );
+                },
+              ),
+              if (imagenExpandida != null)
+                GestureDetector(
+                  onTap: () => setState(() => imagenExpandida = null),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.85),
+                    alignment: Alignment.center,
+                    child: InteractiveViewer(
+                      child: Image.network(
+                        productos[imagenExpandida!].imageUrl,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addProduct,
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add, size: 28),
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: 2,
         onTap: (index) {
@@ -109,96 +136,39 @@ class _ProductosScreenState extends State<ProductosScreen> {
       ),
     );
   }
-}
 
-class _ProductoCard extends StatefulWidget {
-  final Map<String, dynamic> producto;
-  final VoidCallback onImageTap;
-  const _ProductoCard({required this.producto, required this.onImageTap});
+  void _addProduct() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddEditProductScreen()),
+    );
+  }
 
-  @override
-  State<_ProductoCard> createState() => _ProductoCardState();
-}
-
-class _ProductoCardState extends State<_ProductoCard> {
-  bool _hovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: AnimatedScale(
-        scale: _hovering ? 1.05 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: Card(
-          elevation: 6,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: widget.onImageTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: Image.network(
-                      widget.producto['image_url'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image, size: 60),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.producto['name'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Categoría: ${widget.producto['category']}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      ),
-                      ...widget.producto.entries
-                          .where(
-                            (e) =>
-                                e.key != 'name' &&
-                                e.key != 'category' &&
-                                e.key != 'image_url' &&
-                                e.key != 'id',
-                          )
-                          .map(
-                            (e) => Padding(
-                              padding: const EdgeInsets.only(top: 2.0),
-                              child: Text(
-                                '${e.key[0].toUpperCase()}${e.key.substring(1)}: ${e.value}',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+  void _editProduct(ProductModel product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditProductScreen(product: product),
       ),
     );
+  }
+
+  Future<void> _deleteProduct(String productId) async {
+    final success = await _productService.deleteProduct(productId);
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Producto eliminado exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al eliminar el producto'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

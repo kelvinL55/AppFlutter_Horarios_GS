@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'splash.dart';
 import 'screens/productos/productos_screen.dart';
+import 'screens/productos/add_edit_product_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/schedule': (context) => const ScheduleScreen(),
         '/calendar': (context) => const CalendarScreen(),
         '/productos': (context) => ProductosScreen(),
+        '/add-edit-product': (context) => const AddEditProductScreen(),
       },
     );
   }

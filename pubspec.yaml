@@ -37,8 +37,10 @@ dependencies:
   my_app: ^1.0.0
   firebase_core: ^2.27.1
   firebase_auth: ^4.17.9
+  cloud_firestore: ^4.15.9
   intl: ^0.19.0
   flutter_native_splash: ^2.4.6
+  http: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -95,7 +97,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/data/tech_products.json
 
 flutter_icons:
   android: true

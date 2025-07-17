@@ -71,71 +71,89 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.all(24.0),
                   child: Form(
                     key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Stack(
                       children: [
-                        const Icon(
-                          Icons.schedule,
-                          size: 80,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Bienvenido',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Correo electrónico',
-                            prefixIcon: Icon(Icons.email),
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingrese su correo';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Contraseña',
-                            prefixIcon: Icon(Icons.lock),
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingrese su contraseña';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.schedule,
+                              size: 80,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Bienvenido',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: _isLoading
-                                ? const CircularProgressIndicator()
-                                : const Text(
-                                    'Iniciar Sesión',
-                                    style: TextStyle(fontSize: 16),
+                            const SizedBox(height: 24),
+                            TextFormField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Correo electrónico',
+                                prefixIcon: Icon(Icons.email),
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingrese su correo';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _passwordController,
+                              decoration: const InputDecoration(
+                                labelText: 'Contraseña',
+                                prefixIcon: Icon(Icons.lock),
+                                border: OutlineInputBorder(),
+                              ),
+                              obscureText: true,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingrese su contraseña';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _login,
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
+                                ),
+                                child: _isLoading
+                                    ? const CircularProgressIndicator()
+                                    : const Text(
+                                        'Iniciar Sesión',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_forward,
+                              color: Colors.blue,
+                            ),
+                            tooltip: 'Saltar login',
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, '/home');
+                            },
                           ),
                         ),
                       ],

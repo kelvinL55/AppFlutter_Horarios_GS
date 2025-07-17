@@ -4,6 +4,7 @@ import 'package:flutter_application_1/widgets/product_card.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/product_service.dart';
 import 'package:flutter_application_1/screens/productos/add_edit_product_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductosScreen extends StatefulWidget {
   @override
@@ -12,7 +13,89 @@ class ProductosScreen extends StatefulWidget {
 
 class _ProductosScreenState extends State<ProductosScreen> {
   final ProductService _productService = ProductService();
+  final ScrollController _scrollController = ScrollController();
+  final int _pageSize = 10;
+  List<ProductModel> _productos = [];
+  DocumentSnapshot? _lastDoc;
+  bool _isLoading = false;
+  bool _hasMore = true;
   int? imagenExpandida;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialProducts();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchInitialProducts() async {
+    setState(() => _isLoading = true);
+    final products = await _productService.getProductsPaginated(
+      limit: _pageSize,
+    );
+    setState(() {
+      _productos = products;
+      _isLoading = false;
+      _hasMore = products.length == _pageSize;
+      if (products.isNotEmpty) {
+        _lastDoc = null;
+      }
+    });
+    if (products.isNotEmpty) {
+      final query = await FirebaseFirestore.instance
+          .collection('products')
+          .orderBy('createdAt', descending: true)
+          .limit(_pageSize)
+          .get();
+      if (query.docs.isNotEmpty) {
+        setState(() {
+          _lastDoc = query.docs.last;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchMoreProducts() async {
+    if (_isLoading || !_hasMore || _lastDoc == null) return;
+    setState(() => _isLoading = true);
+    final moreProducts = await _productService.getNextProductsPaginated(
+      lastDoc: _lastDoc!,
+      limit: _pageSize,
+    );
+    setState(() {
+      _productos.addAll(moreProducts);
+      _isLoading = false;
+      _hasMore = moreProducts.length == _pageSize;
+    });
+    if (moreProducts.isNotEmpty) {
+      final query = await FirebaseFirestore.instance
+          .collection('products')
+          .orderBy('createdAt', descending: true)
+          .startAfterDocument(_lastDoc!)
+          .limit(_pageSize)
+          .get();
+      if (query.docs.isNotEmpty) {
+        setState(() {
+          _lastDoc = query.docs.last;
+        });
+      }
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        _hasMore) {
+      _fetchMoreProducts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,99 +108,53 @@ class _ProductosScreenState extends State<ProductosScreen> {
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
-      body: StreamBuilder<List<ProductModel>>(
-        stream: _productService.getProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error al cargar productos: ${snapshot.error}',
-                    textAlign: TextAlign.center,
+      body: _productos.isEmpty && _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              children: [
+                GridView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.7,
                   ),
-                ],
-              ),
-            );
-          }
-
-          final productos = snapshot.data ?? [];
-
-          if (productos.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.shopping_bag_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No hay productos disponibles',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Agrega tu primer producto',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return Stack(
-            children: [
-              GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.7,
+                  itemCount: _productos.length + (_hasMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= _productos.length) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final producto = _productos[index];
+                    return ProductCard(
+                      product: producto,
+                      onEdit: () => _editProduct(producto),
+                      onDelete: () => _deleteProduct(producto.id),
+                      onImageTap: () {
+                        setState(() {
+                          imagenExpandida = index;
+                        });
+                      },
+                    );
+                  },
                 ),
-                itemCount: productos.length,
-                itemBuilder: (context, index) {
-                  final producto = productos[index];
-                  return ProductCard(
-                    product: producto,
-                    onEdit: () => _editProduct(producto),
-                    onDelete: () => _deleteProduct(producto.id),
-                    onImageTap: () {
-                      setState(() {
-                        imagenExpandida = index;
-                      });
-                    },
-                  );
-                },
-              ),
-              if (imagenExpandida != null)
-                GestureDetector(
-                  onTap: () => setState(() => imagenExpandida = null),
-                  child: Container(
-                    color: Colors.black.withOpacity(0.85),
-                    alignment: Alignment.center,
-                    child: InteractiveViewer(
-                      child: Image.network(
-                        productos[imagenExpandida!].imageUrl,
-                        fit: BoxFit.contain,
+                if (imagenExpandida != null)
+                  GestureDetector(
+                    onTap: () => setState(() => imagenExpandida = null),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.85),
+                      alignment: Alignment.center,
+                      child: InteractiveViewer(
+                        child: Image.network(
+                          _productos[imagenExpandida!].imageUrl,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          );
-        },
-      ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addProduct,
         backgroundColor: Colors.green,
@@ -141,7 +178,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddEditProductScreen()),
-    );
+    ).then((_) => _fetchInitialProducts());
   }
 
   void _editProduct(ProductModel product) {
@@ -150,7 +187,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
       MaterialPageRoute(
         builder: (context) => AddEditProductScreen(product: product),
       ),
-    );
+    ).then((_) => _fetchInitialProducts());
   }
 
   Future<void> _deleteProduct(String productId) async {
@@ -162,6 +199,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
           backgroundColor: Colors.green,
         ),
       );
+      _fetchInitialProducts();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

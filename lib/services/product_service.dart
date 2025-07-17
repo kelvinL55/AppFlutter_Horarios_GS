@@ -5,7 +5,39 @@ class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'products';
 
-  // Obtener todos los productos
+  // Obtener productos paginados (primera página)
+  Future<List<ProductModel>> getProductsPaginated({int limit = 10}) async {
+    final query = await _firestore
+        .collection(_collection)
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get();
+    return query.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return ProductModel.fromMap(data);
+    }).toList();
+  }
+
+  // Obtener la siguiente página de productos
+  Future<List<ProductModel>> getNextProductsPaginated({
+    required DocumentSnapshot lastDoc,
+    int limit = 10,
+  }) async {
+    final query = await _firestore
+        .collection(_collection)
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(lastDoc)
+        .limit(limit)
+        .get();
+    return query.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return ProductModel.fromMap(data);
+    }).toList();
+  }
+
+  // Obtener todos los productos (stream)
   Stream<List<ProductModel>> getProducts() {
     return _firestore
         .collection(_collection)

@@ -18,16 +18,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (_selectedDay == 15) {
       return [
         {
-          'title': 'Team Meeting',
+          'title': 'Reunión de equipo',
           'time': '9:00 AM - 12:00 PM',
           'icon': 'users',
         },
         {
-          'title': 'Project Review',
+          'title': 'Revisión de proyecto',
           'time': '1:00 PM - 3:00 PM',
           'icon': 'presentation',
         },
-        {'title': 'Client Call', 'time': '3:30 PM - 5:00 PM', 'icon': 'phone'},
+        {
+          'title': 'Llamada con cliente',
+          'time': '3:30 PM - 5:00 PM',
+          'icon': 'phone',
+        },
       ];
     }
     return [];

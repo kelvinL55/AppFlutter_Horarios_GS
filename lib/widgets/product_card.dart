@@ -35,123 +35,144 @@ class _ProductCardState extends State<ProductCard> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Imagen del producto
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  onTap: () => _showProductDetails(context),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                      child: Image.network(
-                        widget.product.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey[200],
-                          child: const Icon(
-                            Icons.broken_image,
-                            size: 60,
-                            color: Colors.grey,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Imagen del producto
+                  Expanded(
+                    flex:
+                        4, // Aumentado de 3 a 4 para dar más espacio a la imagen
+                    child: GestureDetector(
+                      onTap: () => _showProductDetails(context),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          child: Image.network(
+                            widget.product.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
 
-              // Información del producto
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Nombre del producto
-                      Text(
-                        widget.product.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Precio
-                      Text(
-                        '\$${widget.product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Botones de acción (solo íconos)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                  // Información del producto
+                  Expanded(
+                    flex: 3, // Aumentado de 2 a 3 para más espacio
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0), // Reducido de 12 a 8
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Botón Editar
-                          Container(
-                            width: 36,
-                            height: 36,
-                            child: ElevatedButton(
-                              onPressed: widget.onEdit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue[50],
-                                foregroundColor: Colors.blue[700],
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.zero,
+                          // Nombre del producto
+                          Flexible(
+                            child: Text(
+                              widget.product.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14, // Reducido de 16 a 14
+                                color: Colors.black87,
                               ),
-                              child: const Icon(Icons.edit, size: 18),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-
-                          const SizedBox(width: 8),
-
-                          // Botón Eliminar
-                          Container(
-                            width: 36,
-                            height: 36,
-                            child: ElevatedButton(
-                              onPressed: () => _showDeleteDialog(),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red[50],
-                                foregroundColor: Colors.red[700],
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.zero,
+                          const SizedBox(height: 2), // Reducido de 4 a 2
+                          // Precio
+                          Flexible(
+                            child: Text(
+                              '\$${widget.product.price.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16, // Reducido de 18 a 16
+                                color: Colors.green,
                               ),
-                              child: const Icon(Icons.delete, size: 18),
+                            ),
+                          ),
+                          const SizedBox(height: 4), // Reducido de 8 a 4
+                          // Botones de acción (solo íconos)
+                          Flexible(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Botón Editar
+                                SizedBox(
+                                  // Cambiado de Container a SizedBox
+                                  width: 32, // Reducido de 36 a 32
+                                  height: 32, // Reducido de 36 a 32
+                                  child: ElevatedButton(
+                                    onPressed: widget.onEdit,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue[50],
+                                      foregroundColor: Colors.blue[700],
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          6,
+                                        ), // Reducido de 8 a 6
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit,
+                                      size: 16,
+                                    ), // Reducido de 18 a 16
+                                  ),
+                                ),
+
+                                const SizedBox(width: 6), // Reducido de 8 a 6
+                                // Botón Eliminar
+                                SizedBox(
+                                  // Cambiado de Container a SizedBox
+                                  width: 32, // Reducido de 36 a 32
+                                  height: 32, // Reducido de 36 a 32
+                                  child: ElevatedButton(
+                                    onPressed: () => _showDeleteDialog(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red[50],
+                                      foregroundColor: Colors.red[700],
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          6,
+                                        ), // Reducido de 8 a 6
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      size: 16,
+                                    ), // Reducido de 18 a 16
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),

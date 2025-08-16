@@ -4,6 +4,7 @@ import 'package:flutter_application_1/screens/auth/login_screen.dart';
 import 'package:flutter_application_1/screens/home/home_screen.dart';
 import 'package:flutter_application_1/screens/schedule/schedule_screen.dart';
 import 'package:flutter_application_1/screens/schedule/calendar_screen.dart';
+import 'package:flutter_application_1/screens/schedule/admin_schedule_screen.dart';
 import 'firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'splash.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomeScreen(),
         '/schedule': (context) => const ScheduleScreen(),
         '/calendar': (context) => const CalendarScreen(),
+        '/admin-schedule': (context) => const AdminScheduleScreen(),
         '/productos': (context) => ProductosScreen(),
         '/add-edit-product': (context) => const AddEditProductScreen(),
       },

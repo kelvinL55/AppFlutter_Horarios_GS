@@ -25,7 +25,8 @@ class _ProductosScreenState extends State<ProductosScreen> {
   DocumentSnapshot? _lastDoc; // El último documento obtenido, para paginación.
   bool _isLoading = false; // Indica si hay una carga de datos en curso.
   bool _hasMore = true; // Indica si hay más productos por cargar.
-  int? imagenExpandida; // Índice de la imagen que se muestra en pantalla completa.
+  int?
+  imagenExpandida; // Índice de la imagen que se muestra en pantalla completa.
 
   // --- Ciclo de Vida del Widget ---
 
@@ -50,7 +51,9 @@ class _ProductosScreenState extends State<ProductosScreen> {
   // Carga la primera página de productos.
   Future<void> _fetchInitialProducts() async {
     setState(() => _isLoading = true);
-    final products = await _productService.getProductsPaginated(limit: _pageSize);
+    final products = await _productService.getProductsPaginated(
+      limit: _pageSize,
+    );
     setState(() {
       _productos = products;
       _isLoading = false;
@@ -82,7 +85,9 @@ class _ProductosScreenState extends State<ProductosScreen> {
       limit: _pageSize,
     );
     setState(() {
-      _productos.addAll(moreProducts); // Añade los nuevos productos a la lista existente.
+      _productos.addAll(
+        moreProducts,
+      ); // Añade los nuevos productos a la lista existente.
       _isLoading = false;
       _hasMore = moreProducts.length == _pageSize;
     });
@@ -130,12 +135,13 @@ class _ProductosScreenState extends State<ProductosScreen> {
                 // Cuadrícula de productos.
                 GridView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12), // Reducido de 16 a 12
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, // Dos columnas.
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.7, // Relación de aspecto de las tarjetas.
+                    crossAxisSpacing: 12, // Reducido de 16 a 12
+                    mainAxisSpacing: 12, // Reducido de 16 a 12
+                    childAspectRatio:
+                        0.65, // Ajustado de 0.7 a 0.65 para más altura
                   ),
                   // El itemCount incluye un item extra para el indicador de carga si hay más productos.
                   itemCount: _productos.length + (_hasMore ? 1 : 0),
@@ -162,7 +168,10 @@ class _ProductosScreenState extends State<ProductosScreen> {
                       color: Colors.black.withOpacity(0.85),
                       alignment: Alignment.center,
                       child: InteractiveViewer(
-                        child: Image.network(_productos[imagenExpandida!].imageUrl, fit: BoxFit.contain),
+                        child: Image.network(
+                          _productos[imagenExpandida!].imageUrl,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
@@ -200,7 +209,9 @@ class _ProductosScreenState extends State<ProductosScreen> {
   void _editProduct(ProductModel product) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddEditProductScreen(product: product)),
+      MaterialPageRoute(
+        builder: (context) => AddEditProductScreen(product: product),
+      ),
     ).then((_) => _fetchInitialProducts());
   }
 
@@ -209,12 +220,18 @@ class _ProductosScreenState extends State<ProductosScreen> {
     final success = await _productService.deleteProduct(productId);
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Producto eliminado exitosamente'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Producto eliminado exitosamente'),
+          backgroundColor: Colors.green,
+        ),
       );
       _fetchInitialProducts(); // Recarga la lista para reflejar la eliminación.
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al eliminar el producto'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Error al eliminar el producto'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

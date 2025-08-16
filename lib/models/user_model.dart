@@ -2,7 +2,7 @@ class UserModel {
   final String id;
   final String email;
   final String name;
-  final String role;
+  final String role; // 'admin' o 'user'
   final String department;
 
   UserModel({
@@ -18,7 +18,7 @@ class UserModel {
       id: map['id'] ?? '',
       email: map['email'] ?? '',
       name: map['name'] ?? '',
-      role: map['role'] ?? '',
+      role: map['role'] ?? 'user',
       department: map['department'] ?? '',
     );
   }
@@ -32,4 +32,7 @@ class UserModel {
       'department': department,
     };
   }
+
+  bool get isAdmin => role == 'admin';
+  bool get isUser => role == 'user';
 }

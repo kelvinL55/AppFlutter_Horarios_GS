@@ -10,11 +10,17 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'splash.dart';
 import 'screens/productos/productos_screen.dart';
 import 'screens/productos/add_edit_product_screen.dart';
+import 'screens/admin/user_management_screen.dart';
+import 'utils/firestore_seeder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeDateFormatting('es');
+
+  // Sembrar usuarios de ejemplo si no existen
+  await FirestoreSeeder.seedIfEmpty();
+
   runApp(const MyApp());
 }
 
@@ -42,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/admin-schedule': (context) => const AdminScheduleScreen(),
         '/productos': (context) => ProductosScreen(),
         '/add-edit-product': (context) => const AddEditProductScreen(),
+        '/user-management': (context) => const UserManagementScreen(),
       },
     );
   }

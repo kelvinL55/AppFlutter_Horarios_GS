@@ -37,6 +37,27 @@ class UserService {
     }
   }
 
+  // Obtener usuario por email
+  Future<UserModel?> getUserByEmail(String email) async {
+    try {
+      final query = await _firestore
+          .collection(_collection)
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        final data = doc.data();
+        data['id'] = doc.id;
+        return UserModel.fromMap(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener usuario por email: $e');
+      return null;
+    }
+  }
+
   // Crear o actualizar usuario
   Future<bool> createOrUpdateUser(UserModel user) async {
     try {

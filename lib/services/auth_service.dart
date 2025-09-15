@@ -30,8 +30,9 @@ class AuthService {
           await _userService.createOrUpdateUser(userModel);
           return userModel;
         } else {
-          // Usuario no predefinido, obtener de Firestore
+          // Usuario no predefinido, intentar por ID y luego por email
           userModel = await _userService.getUserById(user.uid);
+          userModel ??= await _userService.getUserByEmail(email);
           if (userModel != null) {
             return userModel;
           } else {

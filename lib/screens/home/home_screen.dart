@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
 import 'package:flutter_application_1/models/user_model.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -11,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
   UserModel? _currentUser;
   bool _isLoading = true;
 
@@ -22,14 +23,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadCurrentUser() async {
     try {
-      final user = await _authService.signInAsPredefinedUser(
-        _getCurrentUserId(),
-      );
-      if (mounted) {
+      // Si viene un usuario desde Login por argumentos, úsalo
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is UserModel) {
         setState(() {
-          _currentUser = user;
+          _currentUser = args;
           _isLoading = false;
         });
+        return;
+      }
+
+      // Fallback: si hay usuario en FirebaseAuth, traemos su documento
+      final authUser = _authService.currentUser;
+      if (authUser != null) {
+        final userModel = await _userService.getUserById(authUser.uid);
+        if (mounted) {
+          setState(() {
+            _currentUser = userModel;
+            _isLoading = false;
+          });
+        }
+      } else {
+        // Último recurso: usuario por defecto de desarrollo
+        final user = await _authService.signInAsPredefinedUser(
+          _getCurrentUserId(),
+        );
+        if (mounted) {
+          setState(() {
+            _currentUser = user;
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       print('Error al cargar usuario: $e');
@@ -61,6 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final isAdmin = _currentUser?.isAdmin ?? false;
+    final Color roleColor = isAdmin
+        ? const Color(0xFF2ECC71)
+        : const Color(0xFF4A90E2);
 
     return Scaffold(
       appBar: AppBar(
@@ -74,10 +101,16 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               tooltip: 'Administración',
             ),
-          IconButton(
-            icon: const Icon(Icons.logout),
+          TextButton.icon(
             onPressed: _signOut,
-            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            label: const Text(
+              'Cerrar sesión',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -98,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Icon(
                           isAdmin ? Icons.admin_panel_settings : Icons.person,
-                          color: isAdmin ? Colors.orange : Colors.blue,
+                          color: roleColor,
                           size: 32,
                         ),
                         const SizedBox(width: 16),
@@ -127,11 +160,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isAdmin ? Colors.orange : Colors.blue,
+                                  color: roleColor,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  isAdmin ? 'Administrador' : 'Usuario',
+                                  isAdmin
+                                      ? 'Usuario Administrativo'
+                                      : 'Usuario',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -170,13 +205,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildNotificationItem(
                       'Cambios en horarios',
                       'Se han actualizado los horarios para la próxima semana',
-                      Icons.update,
+                      Icons.schedule_send,
                     ),
                     const Divider(),
                     _buildNotificationItem(
                       'Recordatorio',
                       'No olvides revisar tu horario semanal',
-                      Icons.notifications,
+                      Icons.notifications_active_outlined,
                     ),
                   ],
                 ),
@@ -249,20 +284,41 @@ class _HomeScreenState extends State<HomeScreen> {
                         'Modificar horarios existentes',
                         Icons.edit,
                       ),
+                      _buildAdminFeature('Gestionar usuarios', Icons.people),
                       const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/admin-schedule');
-                          },
-                          icon: const Icon(Icons.admin_panel_settings),
-                          label: const Text('Ir a Administración'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/admin-schedule');
+                              },
+                              icon: const Icon(Icons.admin_panel_settings),
+                              label: const Text('Horarios'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/user-management',
+                                );
+                              },
+                              icon: const Icon(Icons.people),
+                              label: const Text('Usuarios'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

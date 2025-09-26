@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/models/product_model.dart';
-import 'package:flutter_application_1/services/product_service.dart';
+import 'package:evelyn/models/product_model.dart';
+import 'package:evelyn/services/product_service.dart';
 import 'package:http/http.dart' as http;
 
 // --- Pantalla para Agregar o Editar un Producto ---

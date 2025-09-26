@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:evelyn/services/auth_service.dart';
+import 'package:evelyn/widgets/bottom_nav_bar.dart';
+import 'package:evelyn/models/user_model.dart';
+import 'package:evelyn/services/user_service.dart';
+import 'package:evelyn/screens/settings/screen_timeout_settings.dart';
+import 'package:evelyn/screens/admin/employee_admin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,7 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCurrentUser();
+    // No llamar _loadCurrentUser aquí para evitar el error de ModalRoute
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isLoading) {
+      _loadCurrentUser();
+    }
   }
 
   Future<void> _loadCurrentUser() async {
@@ -60,7 +70,20 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          // En caso de error, usar un usuario por defecto o mostrar un mensaje
+          _currentUser = null;
         });
+
+        // Mostrar un mensaje de error al usuario
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error al cargar datos del usuario. Modo sin conexión.',
+            ),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     }
   }
@@ -81,7 +104,74 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Cargando datos del usuario...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Si no hay usuario, mostrar una pantalla de error amigable
+    if (_currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Inicio'),
+          actions: [
+            TextButton.icon(
+              onPressed: _signOut,
+              icon: const Icon(Icons.logout, color: Colors.redAccent),
+              label: const Text(
+                'Ir a Login',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.wifi_off, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'Sin conexión',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No se pudieron cargar los datos del usuario.\nVerifica tu conexión a internet.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  _loadCurrentUser();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final isAdmin = _currentUser?.isAdmin ?? false;
@@ -93,6 +183,22 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Bienvenido, ${_currentUser?.name ?? 'Usuario'}'),
         actions: [
+          // Botón de configuración de tiempo de pantalla
+          IconButton(
+            icon: const Icon(
+              Icons.screen_lock_landscape,
+              color: Colors.deepPurple,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScreenTimeoutSettings(),
+                ),
+              );
+            },
+            tooltip: 'Tiempo de Pantalla',
+          ),
           if (isAdmin)
             IconButton(
               icon: const Icon(Icons.admin_panel_settings),
@@ -100,6 +206,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pushNamed(context, '/admin-schedule');
               },
               tooltip: 'Administración',
+            ),
+          // Botón temporal para administración de empleados (solo para administradores)
+          if (isAdmin)
+            IconButton(
+              icon: const Icon(Icons.people, color: Colors.indigo),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EmployeeAdminScreen(),
+                  ),
+                );
+              },
+              tooltip: 'Administrar Empleados',
             ),
           TextButton.icon(
             onPressed: _signOut,

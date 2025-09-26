@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:evelyn/models/user_model.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,17 +40,41 @@ class UserService {
   // Obtener usuario por email
   Future<UserModel?> getUserByEmail(String email) async {
     try {
-      final query = await _firestore
+      print('🔍 Buscando en Firestore por email: $email');
+
+      // Primero buscar por campo 'email'
+      var query = await _firestore
           .collection(_collection)
           .where('email', isEqualTo: email)
           .limit(1)
           .get();
+
+      print(
+        '📊 Resultados búsqueda por "email": ${query.docs.length} documentos',
+      );
+
+      // Si no encuentra, buscar por campo 'correo' (compatibilidad)
+      if (query.docs.isEmpty) {
+        print('🔄 Buscando por campo "correo"...');
+        query = await _firestore
+            .collection(_collection)
+            .where('correo', isEqualTo: email)
+            .limit(1)
+            .get();
+        print(
+          '📊 Resultados búsqueda por "correo": ${query.docs.length} documentos',
+        );
+      }
+
       if (query.docs.isNotEmpty) {
         final doc = query.docs.first;
         final data = doc.data();
         data['id'] = doc.id;
+        print('✅ Usuario encontrado: ${data}');
         return UserModel.fromMap(data);
       }
+
+      print('❌ Usuario no encontrado en Firestore');
       return null;
     } catch (e) {
       print('Error al obtener usuario por email: $e');

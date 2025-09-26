@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:evelyn/models/user_model.dart';
+import 'package:evelyn/services/user_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -30,12 +30,22 @@ class AuthService {
           await _userService.createOrUpdateUser(userModel);
           return userModel;
         } else {
-          // Usuario no predefinido, intentar por ID y luego por email
-          userModel = await _userService.getUserById(user.uid);
-          userModel ??= await _userService.getUserByEmail(email);
+          // Usuario no predefinido, intentar por email PRIMERO (más confiable)
+          print('🔍 Buscando usuario por email: $email');
+          userModel = await _userService.getUserByEmail(email);
+
+          if (userModel == null) {
+            print('🔍 No encontrado por email, buscando por UID: ${user.uid}');
+            userModel = await _userService.getUserById(user.uid);
+          }
+
           if (userModel != null) {
+            print(
+              '✅ Usuario encontrado: ${userModel.name} (${userModel.email})',
+            );
             return userModel;
           } else {
+            print('⚠️ Usuario no encontrado en Firestore, creando nuevo...');
             // Usuario nuevo, crear con rol por defecto
             userModel = UserModel(
               id: user.uid,
@@ -45,6 +55,7 @@ class AuthService {
               department: '',
             );
             await _userService.createOrUpdateUser(userModel);
+            print('✅ Nuevo usuario creado: ${userModel.name}');
             return userModel;
           }
         }

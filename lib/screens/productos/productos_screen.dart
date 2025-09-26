@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
-import 'package:flutter_application_1/widgets/product_card.dart';
-import 'package:flutter_application_1/models/product_model.dart';
-import 'package:flutter_application_1/services/product_service.dart';
-import 'package:flutter_application_1/screens/productos/add_edit_product_screen.dart';
+import 'package:evelyn/widgets/bottom_nav_bar.dart';
+import 'package:evelyn/widgets/product_card.dart';
+import 'package:evelyn/models/product_model.dart';
+import 'package:evelyn/services/product_service.dart';
+import 'package:evelyn/screens/productos/add_edit_product_screen.dart';
+import 'package:evelyn/screens/productos/firebase_debug_screen.dart';
+import 'package:evelyn/screens/productos/connection_test_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // --- Pantalla de Visualización de Productos ---
@@ -126,6 +128,31 @@ class _ProductosScreenState extends State<ProductosScreen> {
         title: const Text('Productos'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          // Botones de diagnóstico temporales - remover en producción
+          /*
+          IconButton(
+            icon: Icon(Icons.wifi_tethering, color: Colors.blue),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ConnectionTestScreen()),
+              );
+            },
+            tooltip: 'Test de Conexión',
+          ),
+          IconButton(
+            icon: Icon(Icons.bug_report, color: Colors.orange),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FirebaseDebugScreen()),
+              );
+            },
+            tooltip: 'Diagnóstico Firebase',
+          ),
+          */
+        ],
       ),
       // Muestra un indicador de carga inicial o la lista de productos.
       body: _productos.isEmpty && _isLoading

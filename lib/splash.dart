@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'providers/connectivity_provider.dart';
 
 class Splash extends StatefulWidget {
   @override
@@ -33,8 +35,19 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     // Inicia la animación
     _controller.forward();
 
+    // Inicializar servicio de conectividad
+    _initializeConnectivity();
+
     // Navega después del tiempo total
     _navigateHome();
+  }
+
+  _initializeConnectivity() async {
+    final connectivityProvider = Provider.of<ConnectivityProvider>(
+      context,
+      listen: false,
+    );
+    await connectivityProvider.initialize();
   }
 
   @override
@@ -65,12 +78,45 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
   }
 
   _navigateHome() async {
-    await Future.delayed(const Duration(milliseconds: 5000), () {});
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      Navigator.pushReplacementNamed(context, '/login');
+    print('🚀 Splash: Iniciando navegación...');
+
+    // Esperar el tiempo mínimo del splash
+    await Future.delayed(const Duration(milliseconds: 3000));
+    print('⏰ Splash: Tiempo mínimo completado');
+
+    // Esperar a que se inicialice la conectividad
+    final connectivityProvider = Provider.of<ConnectivityProvider>(
+      context,
+      listen: false,
+    );
+
+    // Esperar hasta 2 segundos adicionales para la verificación de conectividad
+    int attempts = 0;
+    while (!connectivityProvider.isInitialized && attempts < 20) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
     }
+
+    print(
+      '🔍 Splash: ConnectivityProvider inicializado: ${connectivityProvider.isInitialized}',
+    );
+    print('🌐 Splash: Estado de conexión: ${connectivityProvider.isConnected}');
+
+    // Si no hay conexión, la pantalla de "sin internet" se mostrará automáticamente
+    // Si hay conexión, navegar normalmente
+    if (connectivityProvider.isConnected) {
+      print('✅ Splash: Hay conexión, navegando...');
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        print('🏠 Splash: Navegando a home');
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        print('🔐 Splash: Navegando a login');
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } else {
+      print('❌ Splash: No hay conexión, no navegando');
+    }
+    // Si no hay conexión, no navegar - la pantalla de sin internet se mostrará
   }
 }

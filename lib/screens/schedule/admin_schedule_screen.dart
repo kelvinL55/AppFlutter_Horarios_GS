@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utils/sample_data_generator.dart';
+import 'package:evelyn/services/local_schedule_service.dart';
+import 'package:evelyn/models/schedule_model.dart';
 
 class AdminScheduleScreen extends StatelessWidget {
   const AdminScheduleScreen({super.key});
@@ -44,7 +45,56 @@ class AdminScheduleScreen extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () async {
                 try {
-                  await SampleDataGenerator.generateSampleSchedule();
+                  final scheduleService = LocalScheduleService();
+                  await scheduleService.createSchedule(
+                    ScheduleModel(
+                      id: 'admin_schedule_${DateTime.now().millisecondsSinceEpoch}',
+                      weekNumber: 1,
+                      weekLabel:
+                          'Semana del ${DateTime.now().day}/${DateTime.now().month}',
+                      startDate: DateTime.now(),
+                      endDate: DateTime.now().add(const Duration(days: 6)),
+                      lastUpdated: DateTime.now(),
+                      isActive: true,
+                      shifts: [
+                        ShiftModel(
+                          day: 'Lunes',
+                          startTime: '08:00',
+                          endTime: '17:00',
+                        ),
+                        ShiftModel(
+                          day: 'Martes',
+                          startTime: '08:00',
+                          endTime: '17:00',
+                        ),
+                        ShiftModel(
+                          day: 'Miércoles',
+                          startTime: '08:00',
+                          endTime: '17:00',
+                        ),
+                        ShiftModel(
+                          day: 'Jueves',
+                          startTime: '08:00',
+                          endTime: '17:00',
+                        ),
+                        ShiftModel(
+                          day: 'Viernes',
+                          startTime: '08:00',
+                          endTime: '15:00',
+                        ),
+                        ShiftModel(
+                          day: 'Sábado',
+                          startTime: '09:00',
+                          endTime: '13:00',
+                        ),
+                        ShiftModel(
+                          day: 'Domingo',
+                          startTime: 'Libre',
+                          endTime: 'Libre',
+                        ),
+                      ],
+                    ),
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -76,7 +126,63 @@ class AdminScheduleScreen extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () async {
                 try {
-                  await SampleDataGenerator.generateMultipleSchedules();
+                  final scheduleService = LocalScheduleService();
+                  // Crear múltiples horarios de ejemplo
+                  for (int i = 1; i <= 3; i++) {
+                    await scheduleService.createSchedule(
+                      ScheduleModel(
+                        id: 'admin_schedule_${i}_${DateTime.now().millisecondsSinceEpoch}',
+                        weekNumber: i,
+                        weekLabel:
+                            'Semana ${i} - ${DateTime.now().day}/${DateTime.now().month}',
+                        startDate: DateTime.now().add(
+                          Duration(days: (i - 1) * 7),
+                        ),
+                        endDate: DateTime.now().add(
+                          Duration(days: (i - 1) * 7 + 6),
+                        ),
+                        lastUpdated: DateTime.now(),
+                        isActive: i == 1, // Solo el primero activo
+                        shifts: [
+                          ShiftModel(
+                            day: 'Lunes',
+                            startTime: '08:00',
+                            endTime: '17:00',
+                          ),
+                          ShiftModel(
+                            day: 'Martes',
+                            startTime: '08:00',
+                            endTime: '17:00',
+                          ),
+                          ShiftModel(
+                            day: 'Miércoles',
+                            startTime: '08:00',
+                            endTime: '17:00',
+                          ),
+                          ShiftModel(
+                            day: 'Jueves',
+                            startTime: '08:00',
+                            endTime: '17:00',
+                          ),
+                          ShiftModel(
+                            day: 'Viernes',
+                            startTime: '08:00',
+                            endTime: '15:00',
+                          ),
+                          ShiftModel(
+                            day: 'Sábado',
+                            startTime: '09:00',
+                            endTime: '13:00',
+                          ),
+                          ShiftModel(
+                            day: 'Domingo',
+                            startTime: 'Libre',
+                            endTime: 'Libre',
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

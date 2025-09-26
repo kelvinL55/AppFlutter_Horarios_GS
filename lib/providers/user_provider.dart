@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:evelyn/models/user_model.dart';
+import 'package:evelyn/services/auth_service.dart';
 
 class UserProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();

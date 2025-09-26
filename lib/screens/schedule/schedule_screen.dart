@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
-import 'package:flutter_application_1/services/schedule_service.dart';
-import 'package:flutter_application_1/models/schedule_model.dart';
+import 'package:evelyn/widgets/bottom_nav_bar.dart';
+import 'package:evelyn/services/local_schedule_service.dart';
+import 'package:evelyn/models/schedule_model.dart';
+import 'package:evelyn/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 class ScheduleScreen extends StatelessWidget {
@@ -9,7 +11,7 @@ class ScheduleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScheduleService _scheduleService = ScheduleService();
+    final LocalScheduleService _scheduleService = LocalScheduleService();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -30,6 +32,19 @@ class ScheduleScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.calendar_month,
+              color: Color(0xFF179EDD),
+              size: 24,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/calendar');
+            },
+            tooltip: 'Ver Calendario',
+          ),
+        ],
       ),
       body: StreamBuilder<ScheduleModel?>(
         stream: _scheduleService.getCurrentSchedule(),
@@ -53,8 +68,22 @@ class ScheduleScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Verifica tu conexión a internet',
+                    'Error: ${snapshot.error}',
                     style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Recargar la página
+                      Navigator.pushReplacementNamed(context, '/schedule');
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reintentar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF179EDD),
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -213,44 +242,30 @@ class ScheduleScreen extends StatelessWidget {
                 ),
               ),
 
-              // Botón para ir al calendario
+              // Botón de administración (solo para administradores)
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/calendar');
-                        },
-                        icon: const Icon(Icons.calendar_month),
-                        label: const Text('Ver Calendario'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                child: Consumer<UserProvider>(
+                  builder: (context, userProvider, child) {
+                    if (userProvider.isAdmin) {
+                      return Center(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/admin-schedule');
+                          },
+                          icon: const Icon(
+                            Icons.admin_panel_settings,
+                            size: 16,
                           ),
-                          backgroundColor: const Color(0xFF179EDD),
-                          foregroundColor: Colors.white,
+                          label: const Text('Admin (Desarrollo)'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF60758a),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Botón temporal de administración (solo para desarrollo)
-                    // En producción, esto se mostraría solo para administradores
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/admin-schedule');
-                        },
-                        icon: const Icon(Icons.admin_panel_settings, size: 16),
-                        label: const Text('Admin (Desarrollo)'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFF60758a),
-                        ),
-                      ),
-                    ),
-                  ],
+                      );
+                    }
+                    return const SizedBox.shrink(); // No mostrar nada si no es admin
+                  },
                 ),
               ),
             ],

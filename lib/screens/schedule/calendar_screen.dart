@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
+import 'package:evelyn/widgets/bottom_nav_bar.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -68,7 +68,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Schedule',
+          'Calendario',
           style: TextStyle(
             color: Color(0xFF111418),
             fontWeight: FontWeight.bold,

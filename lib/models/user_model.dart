@@ -16,8 +16,8 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] ?? '',
-      email: map['email'] ?? '',
-      name: map['name'] ?? '',
+      email: map['email'] ?? map['correo'] ?? '', // Compatibilidad con 'correo'
+      name: map['name'] ?? map['usuario'] ?? '', // Compatibilidad con 'usuario'
       role: map['role'] ?? 'user',
       department: map['department'] ?? '',
     );
@@ -27,7 +27,9 @@ class UserModel {
     return {
       'id': id,
       'email': email,
+      'correo': email, // Compatibilidad con estructura existente
       'name': name,
+      'usuario': name, // Compatibilidad con estructura existente
       'role': role,
       'department': department,
     };

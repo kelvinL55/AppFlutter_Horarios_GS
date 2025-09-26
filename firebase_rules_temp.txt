@@ -1,0 +1,28 @@
+// Reglas temporales de Firebase Firestore para desarrollo
+// ⚠️ IMPORTANTE: Estas reglas son para desarrollo/pruebas únicamente
+// Para producción, implementa autenticación adecuada
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir lectura y escritura en la colección de productos
+    match /products/{document} {
+      allow read, write: if true;
+    }
+    
+    // Permitir lectura y escritura en la colección de usuarios
+    match /users/{document} {
+      allow read, write: if true;
+    }
+    
+    // Permitir lectura y escritura en la colección de horarios
+    match /schedules/{document} {
+      allow read, write: if true;
+    }
+    
+    // Permitir acceso a cualquier otra colección (temporal)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:evelyn/models/user_model.dart';
+import 'package:evelyn/services/user_service.dart';
 
 class FirestoreSeeder {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -8,6 +8,14 @@ class FirestoreSeeder {
 
   // Usuarios de ejemplo para sembrar en Firestore
   static final List<UserModel> _sampleUsers = [
+    // Usuario real de Andrés desde Firestore
+    UserModel(
+      id: 'TnuaVW4XouuCZHgc8sgR',
+      email: 'andres.sanchez01094@gmail.com',
+      name: 'Andres',
+      role: 'user',
+      department: 'General',
+    ),
     UserModel(
       id: '1H9moElLzdQULSAdstIAbjg3Xah1',
       email: 'user1@example.com',

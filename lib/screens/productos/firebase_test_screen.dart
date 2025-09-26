@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-importpackage:flutter_application_1/services/firebase_test_service.dart;class FirebaseTestScreen extends StatefulWidget [object Object]const FirebaseTestScreen({super.key});
+importpackage:evelyn/services/firebase_test_service.dart;class FirebaseTestScreen extends StatefulWidget [object Object]const FirebaseTestScreen({super.key});
 
   @override
   State<FirebaseTestScreen> createState() => _FirebaseTestScreenState();

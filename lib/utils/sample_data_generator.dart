@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/models/schedule_model.dart';
+import 'package:evelyn/models/schedule_model.dart';
 
 class SampleDataGenerator {
   static Future<void> generateSampleSchedule() async {

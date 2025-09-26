@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/utils/firestore_seeder.dart';
+import 'package:evelyn/models/user_model.dart';
+import 'package:evelyn/utils/firestore_seeder.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});

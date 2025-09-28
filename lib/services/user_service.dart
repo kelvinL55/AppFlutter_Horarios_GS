@@ -37,41 +37,69 @@ class UserService {
     }
   }
 
-  // Obtener usuario por email
+  // Cache para usuarios consultados recientemente
+  static final Map<String, UserModel> _userCache = {};
+  static const Duration _cacheExpiration = Duration(minutes: 5);
+  static final Map<String, DateTime> _cacheTimestamps = {};
+
+  // Obtener usuario por email con cache
   Future<UserModel?> getUserByEmail(String email) async {
     try {
+      // Verificar cache primero
+      if (_userCache.containsKey(email)) {
+        final timestamp = _cacheTimestamps[email];
+        if (timestamp != null &&
+            DateTime.now().difference(timestamp) < _cacheExpiration) {
+          print('📦 Usuario encontrado en cache: $email');
+          return _userCache[email];
+        } else {
+          // Cache expirado, limpiar
+          _userCache.remove(email);
+          _cacheTimestamps.remove(email);
+        }
+      }
+
       print('🔍 Buscando en Firestore por email: $email');
 
-      // Primero buscar por campo 'email'
-      var query = await _firestore
-          .collection(_collection)
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-
-      print(
-        '📊 Resultados búsqueda por "email": ${query.docs.length} documentos',
-      );
-
-      // Si no encuentra, buscar por campo 'correo' (compatibilidad)
-      if (query.docs.isEmpty) {
-        print('🔄 Buscando por campo "correo"...');
-        query = await _firestore
+      // Buscar en paralelo por ambos campos para mayor eficiencia
+      final futures = await Future.wait([
+        _firestore
+            .collection(_collection)
+            .where('email', isEqualTo: email)
+            .limit(1)
+            .get(),
+        _firestore
             .collection(_collection)
             .where('correo', isEqualTo: email)
             .limit(1)
-            .get();
-        print(
-          '📊 Resultados búsqueda por "correo": ${query.docs.length} documentos',
-        );
+            .get(),
+      ]);
+
+      final emailQuery = futures[0];
+      final correoQuery = futures[1];
+
+      QuerySnapshot? resultQuery;
+      if (emailQuery.docs.isNotEmpty) {
+        resultQuery = emailQuery;
+        print('📊 Usuario encontrado por campo "email"');
+      } else if (correoQuery.docs.isNotEmpty) {
+        resultQuery = correoQuery;
+        print('📊 Usuario encontrado por campo "correo"');
       }
 
-      if (query.docs.isNotEmpty) {
-        final doc = query.docs.first;
-        final data = doc.data();
+      if (resultQuery != null && resultQuery.docs.isNotEmpty) {
+        final doc = resultQuery.docs.first;
+        final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
-        print('✅ Usuario encontrado: ${data}');
-        return UserModel.fromMap(data);
+
+        final user = UserModel.fromMap(data);
+
+        // Guardar en cache
+        _userCache[email] = user;
+        _cacheTimestamps[email] = DateTime.now();
+
+        print('✅ Usuario encontrado y cacheado: ${user.name}');
+        return user;
       }
 
       print('❌ Usuario no encontrado en Firestore');

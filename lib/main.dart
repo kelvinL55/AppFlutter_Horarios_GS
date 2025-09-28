@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:evelyn/screens/auth/login_screen.dart';
+import 'package:evelyn/screens/auth/register_screen.dart';
+import 'package:evelyn/screens/auth/employee_login_screen.dart';
+import 'package:evelyn/screens/auth/forgot_password_screen.dart';
 import 'package:evelyn/screens/home/home_screen.dart';
 import 'package:evelyn/screens/schedule/schedule_screen.dart';
 import 'package:evelyn/screens/schedule/calendar_screen.dart';
@@ -17,6 +20,7 @@ import 'utils/user_updater.dart';
 import 'utils/schedule_seeder.dart';
 import 'services/screen_timeout_service.dart';
 import 'providers/connectivity_provider.dart';
+import 'providers/user_provider.dart';
 import 'widgets/no_internet_screen.dart';
 
 void main() async {
@@ -31,22 +35,32 @@ void main() async {
     // Inicializar servicio de tiempo de pantalla
     await ScreenTimeoutService.initialize();
 
-    // Sembrar usuarios de ejemplo si no existen (solo si Firebase funciona)
-    try {
-      await FirestoreSeeder.seedIfEmpty();
-      await UserUpdater.fixAllUsers();
-      await ScheduleSeeder.seedIfEmpty();
-      print('✅ Datos de Firebase inicializados correctamente');
-    } catch (e) {
-      print('⚠️ Error al inicializar datos de Firebase: $e');
-      print('📱 La aplicación funcionará en modo sin conexión');
-    }
+    // Inicializar datos de Firebase en segundo plano (no bloquea el inicio)
+    _initializeFirebaseDataInBackground();
   } catch (e) {
     print('❌ Error al inicializar Firebase: $e');
     print('📱 La aplicación funcionará sin Firebase');
   }
 
   runApp(const MyApp());
+}
+
+// Función para inicializar datos de Firebase en segundo plano
+void _initializeFirebaseDataInBackground() {
+  Future.microtask(() async {
+    try {
+      // Ejecutar operaciones de inicialización de forma asíncrona
+      await Future.wait([
+        FirestoreSeeder.seedIfEmpty(),
+        UserUpdater.fixAllUsers(),
+        ScheduleSeeder.seedIfEmpty(),
+      ]);
+      print('✅ Datos de Firebase inicializados correctamente');
+    } catch (e) {
+      print('⚠️ Error al inicializar datos de Firebase: $e');
+      print('📱 La aplicación funcionará en modo sin conexión');
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -57,6 +71,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: Consumer<ConnectivityProvider>(
         builder: (context, connectivityProvider, child) {
@@ -72,6 +87,9 @@ class MyApp extends StatelessWidget {
             initialRoute: '/splash',
             routes: {
               '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
+              '/employee-login': (context) => const EmployeeLoginScreen(),
+              '/forgot-password': (context) => const ForgotPasswordScreen(),
               '/splash': (context) => Splash(),
               '/home': (context) => HomeScreen(),
               '/schedule': (context) => const ScheduleScreen(),

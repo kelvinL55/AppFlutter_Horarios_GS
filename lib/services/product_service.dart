@@ -5,18 +5,45 @@ class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'products';
 
-  // Obtener productos paginados (primera página)
+  // Cache para productos
+  static final Map<String, List<ProductModel>> _productsCache = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheExpiration = Duration(minutes: 5);
+
+  // Obtener productos paginados (primera página) con cache
   Future<List<ProductModel>> getProductsPaginated({int limit = 10}) async {
+    final cacheKey = 'products_$limit';
+
+    // Verificar cache
+    if (_productsCache.containsKey(cacheKey)) {
+      final timestamp = _cacheTimestamps[cacheKey];
+      if (timestamp != null &&
+          DateTime.now().difference(timestamp) < _cacheExpiration) {
+        print('📦 Productos encontrados en cache');
+        return _productsCache[cacheKey]!;
+      } else {
+        _productsCache.remove(cacheKey);
+        _cacheTimestamps.remove(cacheKey);
+      }
+    }
+
     final query = await _firestore
         .collection(_collection)
         .orderBy('createdAt', descending: true)
         .limit(limit)
         .get();
-    return query.docs.map((doc) {
+
+    final products = query.docs.map((doc) {
       final data = doc.data();
       data['id'] = doc.id;
       return ProductModel.fromMap(data);
     }).toList();
+
+    // Guardar en cache
+    _productsCache[cacheKey] = products;
+    _cacheTimestamps[cacheKey] = DateTime.now();
+
+    return products;
   }
 
   // Obtener la siguiente página de productos

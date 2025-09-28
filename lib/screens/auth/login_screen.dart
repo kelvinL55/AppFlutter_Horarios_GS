@@ -23,12 +23,16 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
+    // Animación más rápida y simple para mejor rendimiento
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800), // Reducido de 1500ms
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ), // Curva más simple
     );
     _animationController.forward();
 
@@ -118,16 +122,10 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF8F9FA), // Gris muy claro
-              Color(0xFFE9ECEF), // Gris claro
-              Color(0xFFDEE2E6), // Gris medio
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
+          // Gradiente simplificado para mejor rendimiento
+          color: Color(
+            0xFFF8F9FA,
+          ), // Color sólido en lugar de gradiente complejo
         ),
         child: SafeArea(
           child: Stack(
@@ -192,19 +190,18 @@ class _LoginScreenState extends State<LoginScreen>
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: Card(
-                      elevation: 12,
-                      shadowColor: Colors.black.withOpacity(0.2),
+                      elevation: 8, // Reducido de 12 para mejor rendimiento
+                      shadowColor: Colors.black.withOpacity(0.15), // Reducido
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(
+                          16,
+                        ), // Reducido de 20
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0xFFFFFFFF), Color(0xFFFBFCFE)],
-                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors
+                              .white, // Color sólido en lugar de gradiente
                         ),
                         padding: const EdgeInsets.all(32.0),
                         child: Form(
@@ -240,20 +237,17 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               const SizedBox(height: 8),
 
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                child: Text(
-                                  _isAdminMode
-                                      ? 'Modo Administrador'
-                                      : 'Modo Usuario',
-                                  key: ValueKey(_isAdminMode),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: _isAdminMode
-                                        ? const Color(0xFFDC3545)
-                                        : const Color(0xFF28A745),
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              // Texto simple sin animación para mejor rendimiento
+                              Text(
+                                _isAdminMode
+                                    ? 'Modo Administrador'
+                                    : 'Modo Usuario',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _isAdminMode
+                                      ? const Color(0xFFDC3545)
+                                      : const Color(0xFF28A745),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: 32),
@@ -369,7 +363,49 @@ class _LoginScreenState extends State<LoginScreen>
                                 },
                               ),
 
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 24),
+
+                              // Enlaces adicionales
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/forgot-password',
+                                      );
+                                    },
+                                    child: const Text(
+                                      '¿Olvidaste tu contraseña?',
+                                      style: TextStyle(
+                                        color: Color(0xFF4A90E2),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/employee-login',
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Acceso Empleado',
+                                      style: TextStyle(
+                                        color: Color(0xFF4A90E2),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
 
                               // Botón de login elegante
                               SizedBox(
@@ -413,6 +449,34 @@ class _LoginScreenState extends State<LoginScreen>
                                           ],
                                         ),
                                 ),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // Enlace para crear cuenta
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    '¿No tienes cuenta? ',
+                                    style: TextStyle(
+                                      color: Color(0xFF6C757D),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/register');
+                                    },
+                                    child: const Text(
+                                      'Crear cuenta',
+                                      style: TextStyle(
+                                        color: Color(0xFF4A90E2),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

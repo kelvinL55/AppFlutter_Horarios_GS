@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para la colección de usuarios
+    match /users/{userId} {
+      // Los usuarios pueden leer y escribir sus propios datos
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Los administradores pueden leer todos los usuarios
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // Los administradores pueden crear y actualizar usuarios
+      allow create, update: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Reglas para la colección de empleados
+    match /employees/{employeeId} {
+      // Solo los administradores pueden leer, crear, actualizar y eliminar empleados
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // Los usuarios autenticados pueden leer información básica de empleados activos
+      allow read: if request.auth != null && 
+        resource.data.isActive == true;
+    }
+    
+    // Reglas para la colección de horarios
+    match /schedules/{scheduleId} {
+      // Todos los usuarios autenticados pueden leer horarios
+      allow read: if request.auth != null;
+      
+      // Solo los administradores pueden crear, actualizar y eliminar horarios
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Reglas para la colección de productos
+    match /products/{productId} {
+      // Todos los usuarios autenticados pueden leer productos
+      allow read: if request.auth != null;
+      
+      // Solo los administradores pueden crear, actualizar y eliminar productos
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Reglas para la colección de horarios de empleados
+    match /employee_schedules/{scheduleId} {
+      // Los usuarios pueden leer sus propios horarios
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // Los administradores pueden leer todos los horarios
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // Solo los administradores pueden crear, actualizar y eliminar horarios
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Reglas para la colección de días de trabajo
+    match /work_days/{workDayId} {
+      // Los usuarios pueden leer sus propios días de trabajo
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // Los administradores pueden leer todos los días de trabajo
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // Solo los administradores pueden crear, actualizar y eliminar días de trabajo
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Regla por defecto: denegar acceso a cualquier otra colección
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

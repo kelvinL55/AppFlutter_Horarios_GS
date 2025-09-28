@@ -5,89 +5,136 @@ class EmployeeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'employees';
 
-  /// Obtener empleado por ID
-  Future<EmployeeModel?> getEmployeeById(String employeeId) async {
+  // Crear nuevo empleado
+  Future<bool> createEmployee(EmployeeModel employee) async {
     try {
-      final query = await _firestore
+      await _firestore
           .collection(_collection)
-          .where('employeeId', isEqualTo: employeeId)
-          .limit(1)
-          .get();
-
-      if (query.docs.isNotEmpty) {
-        final data = query.docs.first.data();
-        data['id'] = query.docs.first.id;
-        return EmployeeModel.fromMap(data);
-      }
-      return null;
-    } catch (e) {
-      print('❌ Error al obtener empleado: $e');
-      return null;
-    }
-  }
-
-  /// Crear nuevo empleado
-  Future<String?> createEmployee(EmployeeModel employee) async {
-    try {
-      // Verificar que no exista un empleado con el mismo ID
-      final existing = await getEmployeeById(employee.employeeId);
-      if (existing != null) {
-        print('⚠️ Ya existe un empleado con ID: ${employee.employeeId}');
-        return null;
-      }
-
-      final docRef = await _firestore.collection(_collection).add({
-        'employeeId': employee.employeeId,
-        'name': employee.name,
-        'email': employee.email,
-        'department': employee.department,
-        'position': employee.position,
-        'isActive': employee.isActive,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      print('✅ Empleado creado: ${employee.employeeId}');
-      return docRef.id;
-    } catch (e) {
-      print('❌ Error al crear empleado: $e');
-      return null;
-    }
-  }
-
-  /// Actualizar empleado
-  Future<bool> updateEmployee(EmployeeModel employee) async {
-    try {
-      final query = await _firestore
-          .collection(_collection)
-          .where('employeeId', isEqualTo: employee.employeeId)
-          .limit(1)
-          .get();
-
-      if (query.docs.isEmpty) {
-        print('⚠️ Empleado no encontrado: ${employee.employeeId}');
-        return false;
-      }
-
-      await query.docs.first.reference.update({
-        'name': employee.name,
-        'email': employee.email,
-        'department': employee.department,
-        'position': employee.position,
-        'isActive': employee.isActive,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      print('✅ Empleado actualizado: ${employee.employeeId}');
+          .doc(employee.id)
+          .set(employee.toMap());
       return true;
     } catch (e) {
-      print('❌ Error al actualizar empleado: $e');
+      print('Error al crear empleado: $e');
       return false;
     }
   }
 
-  /// Obtener todos los empleados activos
-  Future<List<EmployeeModel>> getActiveEmployees() async {
+  // Obtener empleado por ID
+  Future<EmployeeModel?> getEmployeeById(String id) async {
+    try {
+      final doc = await _firestore.collection(_collection).doc(id).get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        data['id'] = doc.id;
+        return EmployeeModel.fromMap(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener empleado: $e');
+      return null;
+    }
+  }
+
+  // Obtener empleado por código de empleado
+  Future<EmployeeModel?> getEmployeeByCode(String employeeCode) async {
+    try {
+      final query = await _firestore
+          .collection(_collection)
+          .where('employeeCode', isEqualTo: employeeCode)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        final data = doc.data();
+        data['id'] = doc.id;
+        return EmployeeModel.fromMap(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener empleado por código: $e');
+      return null;
+    }
+  }
+
+  // Obtener empleado por cédula
+  Future<EmployeeModel?> getEmployeeByCedula(String cedula) async {
+    try {
+      final query = await _firestore
+          .collection(_collection)
+          .where('cedula', isEqualTo: cedula)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        final data = doc.data();
+        data['id'] = doc.id;
+        return EmployeeModel.fromMap(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener empleado por cédula: $e');
+      return null;
+    }
+  }
+
+  // Verificar empleado por código y cédula
+  Future<EmployeeModel?> verifyEmployee(
+    String employeeCode,
+    String cedula,
+  ) async {
+    try {
+      final query = await _firestore
+          .collection(_collection)
+          .where('employeeCode', isEqualTo: employeeCode)
+          .where('cedula', isEqualTo: cedula)
+          .where('isActive', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        final data = doc.data();
+        data['id'] = doc.id;
+        return EmployeeModel.fromMap(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error al verificar empleado: $e');
+      return null;
+    }
+  }
+
+  // Actualizar empleado
+  Future<bool> updateEmployee(EmployeeModel employee) async {
+    try {
+      await _firestore
+          .collection(_collection)
+          .doc(employee.id)
+          .update(employee.toMap());
+      return true;
+    } catch (e) {
+      print('Error al actualizar empleado: $e');
+      return false;
+    }
+  }
+
+  // Desactivar empleado
+  Future<bool> deactivateEmployee(String id) async {
+    try {
+      await _firestore.collection(_collection).doc(id).update({
+        'isActive': false,
+      });
+      return true;
+    } catch (e) {
+      print('Error al desactivar empleado: $e');
+      return false;
+    }
+  }
+
+  // Obtener todos los empleados activos
+  Future<List<EmployeeModel>> getAllActiveEmployees() async {
     try {
       final query = await _firestore
           .collection(_collection)
@@ -101,12 +148,12 @@ class EmployeeService {
         return EmployeeModel.fromMap(data);
       }).toList();
     } catch (e) {
-      print('❌ Error al obtener empleados activos: $e');
+      print('Error al obtener empleados: $e');
       return [];
     }
   }
 
-  /// Obtener empleados por departamento
+  // Obtener empleados por departamento
   Future<List<EmployeeModel>> getEmployeesByDepartment(
     String department,
   ) async {
@@ -124,136 +171,158 @@ class EmployeeService {
         return EmployeeModel.fromMap(data);
       }).toList();
     } catch (e) {
-      print('❌ Error al obtener empleados por departamento: $e');
+      print('Error al obtener empleados por departamento: $e');
       return [];
     }
   }
 
-  /// Buscar empleados por nombre
-  Future<List<EmployeeModel>> searchEmployeesByName(String name) async {
+  // Verificar si un código de empleado ya existe
+  Future<bool> employeeCodeExists(
+    String employeeCode, {
+    String? excludeId,
+  }) async {
     try {
-      final query = await _firestore
+      Query query = _firestore
           .collection(_collection)
-          .where('isActive', isEqualTo: true)
-          .orderBy('name')
-          .startAt([name])
-          .endAt([name + '\uf8ff'])
-          .get();
+          .where('employeeCode', isEqualTo: employeeCode);
 
-      return query.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return EmployeeModel.fromMap(data);
-      }).toList();
-    } catch (e) {
-      print('❌ Error al buscar empleados: $e');
-      return [];
-    }
-  }
-
-  /// Desactivar empleado (soft delete)
-  Future<bool> deactivateEmployee(String employeeId) async {
-    try {
-      final query = await _firestore
-          .collection(_collection)
-          .where('employeeId', isEqualTo: employeeId)
-          .limit(1)
-          .get();
-
-      if (query.docs.isEmpty) {
-        print('⚠️ Empleado no encontrado: $employeeId');
-        return false;
+      if (excludeId != null) {
+        query = query.where(FieldPath.documentId, isNotEqualTo: excludeId);
       }
 
-      await query.docs.first.reference.update({
-        'isActive': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      print('✅ Empleado desactivado: $employeeId');
-      return true;
+      final result = await query.limit(1).get();
+      return result.docs.isNotEmpty;
     } catch (e) {
-      print('❌ Error al desactivar empleado: $e');
+      print('Error al verificar código de empleado: $e');
       return false;
     }
   }
 
-  /// Crear empleados masivamente (para importar desde Excel)
-  Future<int> createEmployeesBatch(List<EmployeeModel> employees) async {
-    int created = 0;
-    final batch = _firestore.batch();
-
+  // Verificar si una cédula ya existe
+  Future<bool> cedulaExists(String cedula, {String? excludeId}) async {
     try {
-      for (final employee in employees) {
-        // Verificar que no exista
-        final existing = await getEmployeeById(employee.employeeId);
-        if (existing == null) {
-          final docRef = _firestore.collection(_collection).doc();
-          batch.set(docRef, {
-            'employeeId': employee.employeeId,
-            'name': employee.name,
-            'email': employee.email,
-            'department': employee.department,
-            'position': employee.position,
-            'isActive': employee.isActive,
-            'createdAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-          created++;
+      Query query = _firestore
+          .collection(_collection)
+          .where('cedula', isEqualTo: cedula);
+
+      if (excludeId != null) {
+        query = query.where(FieldPath.documentId, isNotEqualTo: excludeId);
+      }
+
+      final result = await query.limit(1).get();
+      return result.docs.isNotEmpty;
+    } catch (e) {
+      print('Error al verificar cédula: $e');
+      return false;
+    }
+  }
+
+  // Cache para búsquedas de empleados
+  static final Map<String, List<EmployeeModel>> _searchCache = {};
+  static final Map<String, DateTime> _searchCacheTimestamps = {};
+  static const Duration _searchCacheExpiration = Duration(minutes: 3);
+
+  // Buscar empleados por nombre con cache y optimización
+  Future<List<EmployeeModel>> searchEmployeesByName(String name) async {
+    try {
+      final searchKey = name.toLowerCase().trim();
+
+      // Verificar cache
+      if (_searchCache.containsKey(searchKey)) {
+        final timestamp = _searchCacheTimestamps[searchKey];
+        if (timestamp != null &&
+            DateTime.now().difference(timestamp) < _searchCacheExpiration) {
+          print('📦 Búsqueda encontrada en cache: $searchKey');
+          return _searchCache[searchKey]!;
+        } else {
+          _searchCache.remove(searchKey);
+          _searchCacheTimestamps.remove(searchKey);
         }
       }
 
-      await batch.commit();
-      print('✅ Creados $created empleados en lote');
-      return created;
+      // Si la búsqueda es muy corta, no hacer consulta
+      if (searchKey.length < 2) {
+        return [];
+      }
+
+      // Optimización: usar límite para evitar cargar todos los empleados
+      final query = await _firestore
+          .collection(_collection)
+          .where('isActive', isEqualTo: true)
+          .orderBy('name')
+          .limit(50) // Limitar resultados para mejor rendimiento
+          .get();
+
+      final employees = query.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return EmployeeModel.fromMap(data);
+      }).toList();
+
+      // Filtrar por nombre con optimización
+      final filteredEmployees = employees
+          .where((employee) => employee.name.toLowerCase().contains(searchKey))
+          .toList();
+
+      // Guardar en cache
+      _searchCache[searchKey] = filteredEmployees;
+      _searchCacheTimestamps[searchKey] = DateTime.now();
+
+      print(
+        '🔍 Búsqueda completada: ${filteredEmployees.length} empleados encontrados',
+      );
+      return filteredEmployees;
     } catch (e) {
-      print('❌ Error al crear empleados en lote: $e');
+      print('Error al buscar empleados: $e');
+      return [];
+    }
+  }
+
+  // Crear múltiples empleados en lote
+  Future<int> createEmployeesBatch(List<EmployeeModel> employees) async {
+    try {
+      final batch = _firestore.batch();
+
+      for (final employee in employees) {
+        final docRef = _firestore.collection(_collection).doc();
+        batch.set(docRef, employee.toMap());
+      }
+
+      await batch.commit();
+      return employees.length;
+    } catch (e) {
+      print('Error al crear empleados en lote: $e');
       return 0;
     }
   }
 
-  /// Obtener estadísticas de empleados
+  // Obtener estadísticas de empleados
   Future<Map<String, int>> getEmployeeStats() async {
     try {
-      final allEmployees = await _firestore.collection(_collection).get();
-      final activeEmployees = await _firestore
-          .collection(_collection)
-          .where('isActive', isEqualTo: true)
-          .get();
+      final query = await _firestore.collection(_collection).get();
 
-      // Contar por departamentos
-      final departments = <String, int>{};
-      for (final doc in activeEmployees.docs) {
-        final dept = doc.data()['department'] as String? ?? 'Sin departamento';
-        departments[dept] = (departments[dept] ?? 0) + 1;
+      int total = query.docs.length;
+      int active = 0;
+      int inactive = 0;
+
+      for (final doc in query.docs) {
+        final data = doc.data();
+        if (data['isActive'] == true) {
+          active++;
+        } else {
+          inactive++;
+        }
       }
 
-      return {
-        'total': allEmployees.docs.length,
-        'active': activeEmployees.docs.length,
-        'inactive': allEmployees.docs.length - activeEmployees.docs.length,
-        ...departments,
-      };
+      return {'total': total, 'active': active, 'inactive': inactive};
     } catch (e) {
-      print('❌ Error al obtener estadísticas: $e');
-      return {};
+      print('Error al obtener estadísticas: $e');
+      return {'total': 0, 'active': 0, 'inactive': 0};
     }
   }
 
-  /// Validar credenciales de empleado (para login)
-  Future<EmployeeModel?> validateEmployee(String employeeId) async {
-    try {
-      final employee = await getEmployeeById(employeeId);
-      if (employee != null && employee.isActive) {
-        print('✅ Empleado validado: ${employee.name}');
-        return employee;
-      } else {
-        print('⚠️ Empleado no encontrado o inactivo: $employeeId');
-        return null;
-      }
-    } catch (e) {
-      print('❌ Error al validar empleado: $e');
-      return null;
-    }
+  // Obtener todos los empleados activos (alias para getAllActiveEmployees)
+  Future<List<EmployeeModel>> getActiveEmployees() async {
+    return getAllActiveEmployees();
   }
 }
